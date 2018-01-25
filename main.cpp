@@ -5,7 +5,6 @@
 #include <SFML/Graphics.hpp>
 #include "classes.cpp"
 
-
 void draw_all(Balls* balls, Buttons* btns, Buttons* counters, Buttons* games, sf::RenderWindow* window) {
         
     window->clear();
@@ -95,6 +94,8 @@ int main() {
                 if (!pressed)
                     continue;
 
+                if(loop.main_menu(move_btns.input(&key_press)) == 0)
+                    continue;
                 loop.games++;
                 loop.game_handler(&key_press);
                 break;

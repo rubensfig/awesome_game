@@ -46,7 +46,6 @@ class Buttons {
             
             for (auto b: btns) {
                 if (std::get<0>(b).getGlobalBounds().contains(keypress->first, keypress->second)) {
-                    std::cout << i << std::endl;
                     return i;
                 }
                 i++;
@@ -66,7 +65,9 @@ class Buttons {
         void init_pos(std::list<std::string> display_text) {
             float x = 60;
             float y = 25;
+
             font.loadFromFile("arial.ttf");
+            
             for (int i=0; i < buttons; i++, y+=40) {
                 t = sf::Text(display_text.front(), font);
                 display_text.pop_front();
@@ -91,6 +92,7 @@ class Balls{
         std::list<std::pair<sf::CircleShape, Object>> balls;
 
         virtual ~Balls() {};
+
         Balls() {
             for (int i=0; i < nballs; ++i) {
                 sf::CircleShape shape(30.f);
@@ -144,28 +146,32 @@ class Game {
         void game_handler(const std::pair<float, float>* key_press) {
             gm_object.update_pos();
 
-            std::pair<sf::CircleShape, Object> element = find_closest(key_press);
+            std::pair<sf::CircleShape, Object>* element = find_closest(key_press);
 
-            gm_object.del_element(&element);
-            std::cout << "none" << std::endl;
+            if(element)
+                gm_object.del_element(element);
+
             return;
         }
 
-       std::pair<sf::CircleShape, Object> find_closest(const std::pair<float, float>* key_press) {
+       std::pair<sf::CircleShape, Object>* find_closest(const std::pair<float, float>* key_press) {
             int i = 0;
-            for (auto b: gm_object.balls) {
+
+            for (auto &b: gm_object.balls) {
                 if(b.first.getGlobalBounds().contains(key_press->first, key_press->second)) {
-                    return b;
+                    return &b;
                 }
             }
+
             std::cout << "not found" << std::endl;
+            return nullptr;
         }
 
         void add_credits() {
             crdts++;
         }
 
-        void main_menu(int in) {
+        int main_menu(int in) {
             int opt = 0;
 
             //0 = add credits
@@ -179,9 +185,7 @@ class Game {
                 case 1:
                     if (crdts <= 0)
                         break;
-
                     crdts--;
-
                     state = GM_PLAY;
                     break;
                 case 2:
@@ -191,7 +195,8 @@ class Game {
                     state = GM_EXIT;
                     break;
                 default:
-                    return;
+                    return -1;
             }            
+            return 0;
         }
 };
