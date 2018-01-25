@@ -125,7 +125,7 @@ class Balls{
                 balls.erase(it);
         }
     private:
-        int nballs = 10;
+        int nballs = 50;
 };
 
 class Game {
