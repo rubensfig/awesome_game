@@ -30,18 +30,25 @@ class Buttons {
     public:
         std::list<std::tuple<sf::RectangleShape, Object, sf::Text>> btns;
         sf::Text t;
+        std::string btn_color;
 
         bool visible;
         bool inter;
 
-        Buttons() {
-            init_pos();
+        Buttons(int nbuttons, bool interactive, std::string color, std::list<std::string> display_text) {
+            buttons = nbuttons;
             visible = false;
-            inter = true;
+            inter = interactive;
+            btn_color = color;
+
+            init_pos(display_text);
         }
 
         int input(std::pair<float, float>* keypress) {
             int i = 0;
+
+            if (inter == false)
+                return -1;
             
             for (auto b: btns) {
                 if (std::get<0>(b).getGlobalBounds().contains(keypress->first, keypress->second)) {
@@ -59,34 +66,27 @@ class Buttons {
 
 
     private:
-        int buttons = 3;
+        int buttons;
 
         sf::Font font;
 
-        void init_pos() {
-            float x = 30;
+        void init_pos(std::list<std::string> display_text) {
+            float x = 60;
             float y = 25;
             font.loadFromFile("arial.ttf");
-            for (int i=0; i < buttons; i++, y+=25) {
-                t = sf::Text("", font);
+            for (int i=0; i < buttons; i++, y+=40) {
+                t = sf::Text(display_text.front(), font);
+                display_text.pop_front();
                 t.setCharacterSize(30);
                 Object obj = Object(x, y);
 
-                switch(i) {
-                    case 0:
-                        t.setString("add credits");
-                        break;
-                    case 1:
-                        t.setString("play");
-                        break;
-                    case 2:
-                        t.setString("exit");
-                        break;
-                }
-
                 sf::RectangleShape shape;
                 shape.setSize(sf::Vector2f(150, 30));
-                shape.setFillColor(sf::Color::Red);
+
+                if (btn_color == "Red")
+                    shape.setFillColor(sf::Color::Red);
+                if (btn_color == "Blue")
+                    shape.setFillColor(sf::Color::Blue);
 
                 btns.emplace_back(shape, obj, t);
             }
@@ -137,10 +137,12 @@ class Game {
     public:
         int crdts;
         int state;
+        int games;
         Balls gm_object = Balls();
 
         Game() {
             crdts = 0;        
+            games = 0;
             state = GM_START;
         }
 
@@ -172,26 +174,29 @@ class Game {
         }
 
         void main_menu(int in) {
-            bool input = false;
             int opt = 0;
 
             //0 = add credits
             //1 = play game
-            //2 = exit
+            //2 = pause game
+            //3 = exit
             switch(in) {
                 case 0:
                     add_credits();
-                    input = true;
                     break;
                 case 1:
                     if (crdts <= 0)
                         break;
+
+                    crdts--;
+
                     state = GM_PLAY;
-                    input = true;
                     break;
                 case 2:
+                    state = GM_PAUSED;
+                    break;
+                case 3:
                     state = GM_EXIT;
-                    input = true;
                     break;
                 default:
                     return;
@@ -199,7 +204,7 @@ class Game {
         }
 };
 
-void draw_all(Balls* balls, Buttons* btns, sf::RenderWindow* window) {
+void draw_all(Balls* balls, Buttons* btns, Buttons* counters, Buttons* games, sf::RenderWindow* window) {
         
     window->clear();
 
@@ -208,17 +213,40 @@ void draw_all(Balls* balls, Buttons* btns, sf::RenderWindow* window) {
         window->draw(it.first);
     }
 
-    int x = 0;
     for (auto &it: btns->btns) {
 
         sf::RectangleShape* rect = &(std::get<0>(it));
         sf::Text* txt = &(std::get<2>(it));
         Object pos = std::get<1>(it);
 
-        rect->setPosition(pos.pos.first, pos.pos.second + x);
-        txt->setPosition(pos.pos.first, pos.pos.second + x - 5);
+        rect->setPosition(pos.pos.first, pos.pos.second );
+        txt->setPosition(pos.pos.first, pos.pos.second);
 
-        x+=30;
+        window->draw(*rect);
+        window->draw(*txt);
+    }
+
+    for (auto &it: counters->btns) {
+
+        sf::RectangleShape* rect = &(std::get<0>(it));
+        sf::Text* txt = &(std::get<2>(it));
+        Object pos = std::get<1>(it);
+
+        rect->setPosition(pos.pos.first, pos.pos.second + 30*6 );
+        txt->setPosition(pos.pos.first, pos.pos.second  + 30*6);
+
+        window->draw(*rect);
+        window->draw(*txt);
+    }
+
+    for (auto &it: games->btns) {
+
+        sf::RectangleShape* rect = &(std::get<0>(it));
+        sf::Text* txt = &(std::get<2>(it));
+        Object pos = std::get<1>(it);
+
+        rect->setPosition(pos.pos.first, pos.pos.second + 35*7 );
+        txt->setPosition(pos.pos.first, pos.pos.second  + 35*7);
 
         window->draw(*rect);
         window->draw(*txt);
@@ -230,13 +258,16 @@ void draw_all(Balls* balls, Buttons* btns, sf::RenderWindow* window) {
 int main() {
 
     Game loop = Game();
-    Buttons btns = Buttons();
+        //Buttons(int nbuttons, bool interactive, string color) {
+    Buttons move_btns = Buttons(4, true, "Red", {"add credits", "play", "pause", "exit"});
+    Buttons counters = Buttons(1, false, "Blue", {""});
+    Buttons games = Buttons(1, false, "Blue", {""});
     sf::RenderWindow window(sf::VideoMode(1024, 768), "fmq_game");
     sf::Event event;
     std::pair<float, float> key_press;
     bool pressed = false;
 
-    draw_all(&loop.gm_object, &btns, &window);
+    draw_all(&loop.gm_object, &move_btns, &counters, &games, &window);
     while (loop.state != GM_EXIT) {
         while(window.pollEvent(event)) {
             if (event.type == sf::Event::MouseButtonPressed)
@@ -250,17 +281,25 @@ int main() {
             case GM_START:
                 if (!pressed)
                     continue;
-                loop.main_menu(btns.input(&key_press));
+                loop.main_menu(move_btns.input(&key_press));
+                break;
+            case GM_PAUSED:
+                if (!pressed)
+                    continue;
+                loop.main_menu(move_btns.input(&key_press));
                 break;
             case GM_PLAY:
                 if (!pressed)
                     continue;
 
+                loop.games++;
                 loop.game_handler(&key_press);
                 break;
         }
 
-        draw_all(&loop.gm_object, &btns, &window);
+        std::get<2>(counters.btns.front()).setString(std::to_string(loop.crdts));
+        std::get<2>(games.btns.front()).setString(std::to_string(loop.games));
+        draw_all(&loop.gm_object, &move_btns, &counters, &games, &window);
         pressed = false;
     }
 }
