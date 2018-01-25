@@ -1,17 +1,22 @@
 # Tiny game demo in C++
 
-# Usage
+## Usage
 
 To run this program execute
-`$ make`
-`$ ./fmq-game`
+```
+$ make
+$ ./fmq-game
+ ```
 
-# Dependencies
+## Dependencies
 
 Fedora, ...
+
+
 `# dnf install SFML-dev`
 
-Fedora, ...
+Ubuntu, ...
+
 `# apt-get install libsfml-dev`
 
 This should work on windows, but I cannot test.
