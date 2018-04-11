@@ -3,21 +3,42 @@
 #define GM_PLAY 2
 #define GM_EXIT 3
 
+class Symbol {
+    public:
+        std::pair<sf::Image, std::string> piece;
+
+        Symbol (std::string filename) {
+            sf::Image temp;
+            temp.loadFromFile(filename);
+            piece = std::make_pair(temp, filename);
+        }
+
+};
+
 class Object {
     public:
-        std::pair<float, float> pos;
+        std::pair<float, float> pos; 
+        std::list<Symbol> cilinder;
 
         Object (float x, float y) {
             pos = std::make_pair(x, y);
+
+            for (auto i: n_symbols) {
+                cilinder.emplace_back(Symbol(""));
+            }
+
         }
 
         Object(std::pair<float, float> elem) {
             pos = elem;
         }
 
-        bool operator() (const std::pair<sf::CircleShape, Object> pair) {
+        /*bool operator() (const std::pair<sf::CircleShape, Object> pair) {
             return (pair.second.pos.first == pos.first && pair.second.pos.second == pos.second);
-        }
+        }*/
+
+    private:
+        int n_symbols = 12;
 };
 
 class Buttons {
@@ -136,7 +157,7 @@ class Game {
         Balls gm_object = Balls();
 
         Game() {
-            crdts = 0;        
+            crdts = 10000;
             games = 0;
             state = GM_START;
         }
