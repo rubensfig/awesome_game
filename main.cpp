@@ -5,7 +5,7 @@
 #include <SFML/Graphics.hpp>
 #include "classes.cpp"
 
-void draw_all(std::vector<Cilinder> slots, Buttons* btns, Buttons* cntrs,Buttons* bet, sf::RenderWindow* window) {
+void draw_all(std::vector<Cilinder> slots, Buttons* btns, Buttons* cntrs, Buttons* bet, Buttons* award, sf::RenderWindow* window) {
 
     window->clear();
 
@@ -59,12 +59,26 @@ void draw_all(std::vector<Cilinder> slots, Buttons* btns, Buttons* cntrs,Buttons
         sf::Text* txt = &(std::get<2>(it));
         Object pos = std::get<1>(it);
 
-        rect->setPosition(pos.pos.first, pos.pos.second + 35*7 );
+        rect->setPosition(pos.pos.first, pos.pos.second + 35*7);
         txt->setPosition(pos.pos.first, pos.pos.second  + 35*7);
 
         window->draw(*rect);
         window->draw(*txt);
-}
+    }
+
+    for (auto &it: award->btns) {
+
+        sf::RectangleShape* rect = &(std::get<0>(it));
+        sf::Text* txt = &(std::get<2>(it));
+        Object pos = std::get<1>(it);
+
+        rect->setPosition(pos.pos.first, pos.pos.second + 40*8);
+        txt->setPosition(pos.pos.first, pos.pos.second  + 40*8);
+
+        window->draw(*rect);
+        window->draw(*txt);
+    }
+
     window->display();
 
     return;
@@ -74,17 +88,18 @@ int main() {
 
     Game loop = Game();
 
-    Buttons move_btns = Buttons(3, true, "Red", {"change bet", "play", "exit"});
+    Buttons move_btns = Buttons(2, true, "Red", {"play", "exit"});
     Buttons counters = Buttons(1, false, "Blue", {""});
     Buttons bet = Buttons(1, false, "Blue", {""});
+    Buttons award = Buttons(1, false, "Blue", {""});
 
     sf::RenderWindow window(sf::VideoMode(1024, 768), "fmq_game");
     sf::Event event;
     std::pair<float, float> key_press;
-    bool pressed = false;
+    bool pressed = true;
     
 
-    draw_all(loop.slots, &move_btns, &counters, &bet, &window);
+    draw_all(loop.slots, &move_btns, &counters, &bet, &award, &window);
     while (loop.state != GM_EXIT) {
         while(window.pollEvent(event)) {
             if (event.type == sf::Event::MouseButtonPressed)
@@ -107,17 +122,17 @@ int main() {
             case GM_PLAY:
                 if(loop.main_menu(move_btns.input(&key_press)) == 1)
                     continue;
-                //if (!pressed)
-                    //continue;
+                if (!pressed)
+                    continue;
                 loop.game_handler(); 
-                
                 break;
         }
 
         std::get<2>(counters.btns.front()).setString(std::to_string(loop.crdts));
         std::get<2>(bet.btns.front()).setString(std::to_string(loop.bet));
+        std::get<2>(bet.btns.front()).setString(std::to_string(loop.gain));
 
-        draw_all(loop.slots, &move_btns, &counters, &bet, &window);
+        draw_all(loop.slots, &move_btns, &counters, &bet, &award, &window);
         pressed = false;
     }
 }

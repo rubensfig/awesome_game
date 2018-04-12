@@ -3,7 +3,7 @@
 #define GM_PLAY 2
 #define GM_EXIT 3
 
-#define MIN_BET 1 
+#define MIN_BET 1
 #define MAX_BET 100
 
 #define N_CILINDERS 3
@@ -18,10 +18,6 @@ class Object {
 
         Object(std::pair<float, float> elem) {
             pos = elem;
-        }
-
-        bool operator() (const std::pair<sf::CircleShape, Object> pair) {
-            return (pair.second.pos.first == pos.first && pair.second.pos.second == pos.second);
         }
 };
 
@@ -52,20 +48,20 @@ class Cilinder {
             pos = 0;
             loc = std::make_pair(x, y);
 
-            cilinder.emplace_back(Symbol("A", 3, 150, 230, 350, 240));
-            cilinder.emplace_back(Symbol("A", 3, 150, 230, 350, 240));
+            cilinder.emplace_back(Symbol("A", 3, 136, 228, 224, 224));
+            cilinder.emplace_back(Symbol("A", 3, 150, 230, 224, 224));
 
-            cilinder.emplace_back(Symbol("B", 2, 150, 530, 350, 240));
-            cilinder.emplace_back(Symbol("B", 2, 150, 530, 350, 240));
-            cilinder.emplace_back(Symbol("C", 2, 440, 200, 350, 240));
-            cilinder.emplace_back(Symbol("C", 2, 440, 200, 350, 240));
+            cilinder.emplace_back(Symbol("B", 2, 120, 536, 257, 256));
+            cilinder.emplace_back(Symbol("B", 2, 120, 536, 257, 256));
+            cilinder.emplace_back(Symbol("C", 2, 452, 188, 208, 293));
+            cilinder.emplace_back(Symbol("C", 2, 452, 188, 208, 293));
 
-            cilinder.emplace_back(Symbol("D", 1, 410, 610, 350, 240));
-            cilinder.emplace_back(Symbol("D", 1, 410, 610, 350, 240));
-            cilinder.emplace_back(Symbol("E", 1, 756, 210, 350, 240));
-            cilinder.emplace_back(Symbol("E", 1, 756, 210, 350, 240));
-            cilinder.emplace_back(Symbol("F", 1, 772, 534, 350, 240));
-            cilinder.emplace_back(Symbol("F", 1, 772, 534, 350, 240));
+            cilinder.emplace_back(Symbol("D", 1, 410, 610, 293, 155));
+            cilinder.emplace_back(Symbol("D", 1, 410, 610, 293, 155));
+            cilinder.emplace_back(Symbol("E", 1, 734, 211, 257, 257));
+            cilinder.emplace_back(Symbol("E", 1, 734, 211, 257, 257));
+            cilinder.emplace_back(Symbol("F", 1, 734, 532, 257, 257));
+            cilinder.emplace_back(Symbol("F", 1, 734, 532, 257, 257));
         }
 
     private:
@@ -145,6 +141,7 @@ class Game {
         int state;
         int games;
         int bet = 10;
+        int gain = 0;
         std::vector<Cilinder> slots;
 
         Game() {
@@ -161,7 +158,6 @@ class Game {
 
         void game_handler() {
             std::cout << "GAME " << std::endl;
-            //std::cout <<  bet   << std::endl;
             int pos;
 
             for (int i = 0; i < N_CILINDERS; i++) {
@@ -170,13 +166,11 @@ class Game {
                 slots.at(i).pos = pos;
             }
 
-            std::cout << crdts << std::endl;
+            gain = award_calc(slots.at(0).cilinder.at(slots.at(0).pos).mult,
+                              slots.at(1).cilinder.at(slots.at(1).pos).mult,
+                              slots.at(2).cilinder.at(slots.at(2).pos).mult);
 
-            crdts += award_calc(slots.at(0).cilinder.at(slots.at(0).pos).mult,
-                                slots.at(1).cilinder.at(slots.at(1).pos).mult,
-                                slots.at(2).cilinder.at(slots.at(2).pos).mult);
-            std::cout << crdts << std::endl;
-
+            crdts += gain;
             state = GM_START;
             return;
         }
@@ -203,17 +197,12 @@ class Game {
             //std::cout << in << std::endl;
             switch(in) {
                 case 0:
-                    //while (bet <= 0 || bet > 10)
-                        //std::cin >> bet;
-                    state = GM_START;
-                    break;
-                case 1:
                     if (crdts <= 0)
                         break;
                     crdts -= bet;
                     state = GM_PLAY;
                     break;
-                case 2:
+                case 1:
                     state = GM_EXIT;
                     break;
                 default:

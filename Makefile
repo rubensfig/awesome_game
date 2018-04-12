@@ -9,3 +9,6 @@ fmq-game:
 
 clean:
 	rm fmq-game 
+
+format:
+	find -regex '.*\.\(h\|cc\)$$' | xargs clang-format -style=file
