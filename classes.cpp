@@ -3,39 +3,70 @@
 #define GM_PLAY 2
 #define GM_EXIT 3
 
-class Symbol {
-    public:
-        std::pair<sf::Image, std::string> piece;
+#define MIN_BET 1 
+#define MAX_BET 100
 
-        Symbol (std::string filename) {
-            sf::Image temp;
-            temp.loadFromFile(filename);
-            piece = std::make_pair(temp, filename);
-        }
-
-};
+#define N_CILINDERS 3
 
 class Object {
     public:
-        std::pair<float, float> pos; 
-        std::list<Symbol> cilinder;
+        std::pair<float, float> pos;
 
         Object (float x, float y) {
             pos = std::make_pair(x, y);
-
-            for (auto i: n_symbols) {
-                cilinder.emplace_back(Symbol(""));
-            }
-
         }
 
         Object(std::pair<float, float> elem) {
             pos = elem;
         }
 
-        /*bool operator() (const std::pair<sf::CircleShape, Object> pair) {
+        bool operator() (const std::pair<sf::CircleShape, Object> pair) {
             return (pair.second.pos.first == pos.first && pair.second.pos.second == pos.second);
-        }*/
+        }
+};
+
+class Symbol {
+    public:
+        std::string piece;
+        sf::Sprite img;
+        std::tuple<float, float, float, float> graph_coor;
+        int mult;
+
+        Symbol(std::string type, int multiplier, float x1,  float y1, float x2, float y2) {
+            piece = type;
+            mult = multiplier;
+
+            graph_coor = std::make_tuple(x1, y1, x2, y2);
+
+            img.setColor(sf::Color::White);
+        }
+};
+
+class Cilinder {
+    public:
+        std::pair<float, float> loc;
+        std::vector<Symbol> cilinder;
+        int pos;
+
+        Cilinder (float x, float y) {
+            pos = 0;
+            loc = std::make_pair(x, y);
+
+            cilinder.emplace_back(Symbol("A", 3, 150, 230, 350, 240));
+            cilinder.emplace_back(Symbol("A", 3, 150, 230, 350, 240));
+
+            cilinder.emplace_back(Symbol("B", 2, 150, 530, 350, 240));
+            cilinder.emplace_back(Symbol("B", 2, 150, 530, 350, 240));
+            cilinder.emplace_back(Symbol("C", 2, 440, 200, 350, 240));
+            cilinder.emplace_back(Symbol("C", 2, 440, 200, 350, 240));
+
+            cilinder.emplace_back(Symbol("D", 1, 410, 610, 350, 240));
+            cilinder.emplace_back(Symbol("D", 1, 410, 610, 350, 240));
+            cilinder.emplace_back(Symbol("E", 1, 756, 210, 350, 240));
+            cilinder.emplace_back(Symbol("E", 1, 756, 210, 350, 240));
+            cilinder.emplace_back(Symbol("F", 1, 772, 534, 350, 240));
+            cilinder.emplace_back(Symbol("F", 1, 772, 534, 350, 240));
+        }
 
     private:
         int n_symbols = 12;
@@ -108,84 +139,53 @@ class Buttons {
         }
 };
 
-class Balls{
-    public:
-        std::list<std::pair<sf::CircleShape, Object>> balls;
-
-        virtual ~Balls() {};
-
-        Balls() {
-            for (int i=0; i < nballs; ++i) {
-                sf::CircleShape shape(30.f);
-                shape.setFillColor(sf::Color::Green);
-
-                Object obj = Object(60, 30);
-
-                balls.emplace_back(std::make_pair(shape, obj));
-            }
-            update_pos();
-        }
-
-        void update_pos() {
-            std::pair<float, float> temp;
-            for (auto &i : balls){
-
-                float x = std::rand() % 870 + 90;
-                float y = std::rand() % 700;
-
-                i.second.pos.first = x;
-                i.second.pos.second = y;
-            }
-        }
-
-        void del_element(const std::pair<sf::CircleShape, Object>* rem_element) {
-            Object rem = Object(rem_element->second.pos); 
-            auto it = std::find_if(balls.begin(), balls.end(), rem);
-
-            if (it != balls.end())
-                balls.erase(it);
-        }
-    private:
-        int nballs = 50;
-};
-
 class Game {
     public:
         int crdts;
         int state;
         int games;
-        Balls gm_object = Balls();
+        int bet = 10;
+        std::vector<Cilinder> slots;
 
         Game() {
             crdts = 10000;
             games = 0;
             state = GM_START;
+
+            slots.emplace_back(200.0, 400.0);
+            slots.emplace_back(500.0, 400.0);
+            slots.emplace_back(800.0, 400.0);
         }
 
         virtual ~Game() {};
 
-        void game_handler(const std::pair<float, float>* key_press) {
-            gm_object.update_pos();
+        void game_handler() {
+            std::cout << "GAME " << std::endl;
+            //std::cout <<  bet   << std::endl;
+            int pos;
 
-            std::pair<sf::CircleShape, Object>* element = find_closest(key_press);
+            for (int i = 0; i < N_CILINDERS; i++) {
+                pos = std::rand() % 11;
+                std::cout << slots.at(i).cilinder.at(pos).piece << std::endl;
+                slots.at(i).pos = pos;
+            }
 
-            if(element)
-                gm_object.del_element(element);
+            std::cout << crdts << std::endl;
 
+            crdts += award_calc(slots.at(0).cilinder.at(slots.at(0).pos).mult,
+                                slots.at(1).cilinder.at(slots.at(1).pos).mult,
+                                slots.at(2).cilinder.at(slots.at(2).pos).mult);
+            std::cout << crdts << std::endl;
+
+            state = GM_START;
             return;
         }
 
-       std::pair<sf::CircleShape, Object>* find_closest(const std::pair<float, float>* key_press) {
-            int i = 0;
+        int award_calc(int a, int b, int c) {
+            if (a != b || a != c)
+                return 0;
 
-            for (auto &b: gm_object.balls) {
-                if(b.first.getGlobalBounds().contains(key_press->first, key_press->second)) {
-                    return &b;
-                }
-            }
-
-            std::cout << "not found" << std::endl;
-            return nullptr;
+            return a*bet;
         }
 
         void add_credits() {
@@ -194,25 +194,26 @@ class Game {
 
         int main_menu(int in) {
             int opt = 0;
-
-            //0 = add credits
+            
+            //0 = choose bet
             //1 = play game
             //2 = pause game
             //3 = exit
+
+            //std::cout << in << std::endl;
             switch(in) {
                 case 0:
-                    add_credits();
+                    //while (bet <= 0 || bet > 10)
+                        //std::cin >> bet;
+                    state = GM_START;
                     break;
                 case 1:
                     if (crdts <= 0)
                         break;
-                    crdts--;
+                    crdts -= bet;
                     state = GM_PLAY;
                     break;
                 case 2:
-                    state = GM_PAUSED;
-                    break;
-                case 3:
                     state = GM_EXIT;
                     break;
                 default:
