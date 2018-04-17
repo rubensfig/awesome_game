@@ -8,15 +8,26 @@ $ make
 $ ./fmq-game
  ```
 
-## Dependencies
+# Respostas às perguntas
 
-Fedora, ...
+## Pergunta 1
 
+A divisão dos prémios foi feita da seguinte forma:
 
-`# dnf install SFML-dev`
+Multiplicador x3 = A A A
+Multiplicador x2 = B B B
+Multiplicador x2 = C C C
+Multiplicador x1 = D D D
+Multiplicador x1 = E E E
+Multiplicador x1 = F F F
 
-Ubuntu, ...
+E o prémio é calculado através de:
+Prémio = Multiplicador\*Aposta
+Frequência de pagamento = P(x3)^3 + P(B)^3 + P(C)^3 = 25%
+Percentagem retorno = 15\*P(x3)^3 + 5\*P(x2)^3 + P(x1)^3 = 75%
 
-`# apt-get install libsfml-dev`
+## Pergunta 2
 
-This should work on windows, but I cannot test.
+Mantendo a mesma lógica da resposta anterior:
+
+1 = MultA\*P(x3)^3 + MultB\*P(x2)^3 + P(x1)^3 <=> MultA = 21 && MultB = 7

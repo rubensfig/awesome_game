@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS= -lsfml-graphics -lsfml-window -lsfml-system -std=c++11
+CFLAGS= -std=c++11
 TARGET=fmq-game
 
 all: $(TARGET)
