@@ -6,8 +6,8 @@ class graphics {
 public:
   graphics() {}
 
-  void get_window(sf::RenderWindow *window);
-  void display() { main_window->display(); }
+  void set_window(sf::RenderWindow *window);
+  void display(); 
 
 private:
   sf::RenderWindow *main_window;

@@ -1,18 +1,29 @@
-#define GM_START 0
-#define GM_PAUSED 1
-#define GM_PLAY 2
-#define GM_EXIT 3
+#include "graph_handler.hpp"
 
 namespace game {
 
-class game {
+class game_state {
+  enum state {
+    GM_START = 0,
+    GM_PAUSED =  1,
+    GM_PLAY = 2 ,
+    GM_EXIT = 3
+  };
+};
+
+class game : game_state {
 public:
   game() {}
   virtual ~game(){};
 
   void game_handler();
   int main_menu(int in);
+  int run();
   int init();
+
+private:
+  bool running;
+  graphics handler;
 };
 
 } // namespace game

@@ -2,6 +2,8 @@
 
 namespace game {
 
-void graphics::get_window(sf::RenderWindow *window) { main_window = window; }
+void graphics::set_window(sf::RenderWindow *window) { main_window = window; }
+
+void graphics::display() { main_window->display(); }
 
 } // namespace game
