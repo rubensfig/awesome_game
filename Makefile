@@ -1,11 +1,21 @@
-CC=g++
-CFLAGS= -lsfml-graphics -lsfml-window -lsfml-system -std=c++11
-TARGET=fmq-game
+CXX := g++
+LIBS=-lsfml-graphics -lsfml-window -lsfml-system
 
-all: $(TARGET)
+all: thegame
 
-fmq-game: 
-	$(CC) main.cpp -o fmq-game $(CFLAGS)
+%.o: %.cpp 
+	$(CXX) -c $< -o $@
+
+%.o: %.hpp 
+	$(CXX) -c $< -o $@
+
+thegame: main.o game.o graph_handler.o
+	@echo "** Building the game" 
+	$(CXX) -o thegame main.o game.o graph_handler.o $(LIBS)
 
 clean:
-	rm fmq-game 
+	rm -f thegame *.o
+
+install: 
+	@echo '** Installing...' 
+	cp thegame /usr/bin/
